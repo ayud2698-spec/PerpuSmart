@@ -1,0 +1,24 @@
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*.orig
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Config lokal (jangan commit kredensial!)
+config/local.php
+
+# Uploads user
+assets/img/uploads/
+
+# Dependencies (jika ada)
+vendor/
+node_modules/
