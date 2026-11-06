@@ -148,6 +148,11 @@ class BukuController {
             redirect('admin/buku');
         }
 
+        if ($this->bukuModel->isDipinjam($id)) {
+            $_SESSION['flash_error'] = 'Buku "' . e($buku['judul']) . '" tidak dapat dihapus karena sedang dipinjam oleh user.';
+            redirect('admin/buku');
+        }
+
         $this->bukuModel->delete($id);
         $_SESSION['flash_success'] = 'Buku "' . e($buku['judul']) . '" berhasil dihapus.';
         redirect('admin/buku');
@@ -161,6 +166,8 @@ class BukuController {
             $_SESSION['flash_error'] = 'Buku tidak ditemukan.';
             redirect('admin/buku');
         }
+        $isDipinjam = $this->bukuModel->isDipinjam($id);
+        $activeLoansCount = $this->bukuModel->countActiveLoans($id);
         $pageTitle = e($buku['judul']) . ' — ' . APP_NAME;
         require_once BASE_PATH . '/views/admin/buku/show.php';
     }

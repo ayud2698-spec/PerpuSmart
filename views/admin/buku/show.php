@@ -51,14 +51,23 @@
                            class="ps-btn-accent">
                             <i data-lucide="pencil"></i> Edit
                         </a>
-                        <form method="POST" action="<?= BASE_URL ?>/index.php?page=admin/buku/delete"
-                              onsubmit="return confirm('Hapus buku ini?')">
-                            <?= csrfField() ?>
-                            <input type="hidden" name="id" value="<?= $buku['id'] ?>">
-                            <button type="submit" class="ps-btn-danger">
+                        <?php if (!empty($isDipinjam)): ?>
+                            <button type="button" class="ps-btn-danger"
+                                    style="opacity: 0.5; cursor: not-allowed;"
+                                    title="Buku sedang dipinjam (<?= (int)$activeLoansCount ?> aktif)"
+                                    onclick="alert('Buku &quot;<?= e(addslashes($buku['judul'])) ?>&quot; tidak dapat dihapus karena sedang dipinjam oleh user (<?= (int)$activeLoansCount ?> transaksi aktif).')">
                                 <i data-lucide="trash-2"></i> Hapus
                             </button>
-                        </form>
+                        <?php else: ?>
+                            <form method="POST" action="<?= BASE_URL ?>/index.php?page=admin/buku/delete"
+                                  onsubmit="return confirm('Hapus buku ini?')">
+                                <?= csrfField() ?>
+                                <input type="hidden" name="id" value="<?= $buku['id'] ?>">
+                                <button type="submit" class="ps-btn-danger">
+                                    <i data-lucide="trash-2"></i> Hapus
+                                </button>
+                            </form>
+                        <?php endif; ?>
                     </div>
                 </div>
 

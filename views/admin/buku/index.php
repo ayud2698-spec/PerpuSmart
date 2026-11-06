@@ -110,6 +110,11 @@
                                                         <div class="ps-book-author">
                                                             <i data-lucide="user" style="width:12px;height:12px"></i>
                                                             <?= e($b['penulis']) ?>
+                                                            <?php if (!empty($b['total_dipinjam']) && (int)$b['total_dipinjam'] > 0): ?>
+                                                                <span class="badge bg-warning text-dark ms-1" style="font-size: 0.72rem;">
+                                                                    <i data-lucide="clock" style="width:10px;height:10px;display:inline"></i> Sedang Dipinjam (<?= (int)$b['total_dipinjam'] ?>)
+                                                                </span>
+                                                            <?php endif; ?>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -146,16 +151,26 @@
                                                        class="ps-action-btn ps-action-edit" title="Edit Buku">
                                                         <i data-lucide="pencil"></i>
                                                     </a>
-                                                    <form method="POST"
-                                                          action="<?= BASE_URL ?>/index.php?page=admin/buku/delete"
-                                                          class="d-inline"
-                                                          onsubmit="return confirm('Hapus buku &quot;<?= e(addslashes($b['judul'])) ?>&quot;?\nAksi ini tidak dapat dibatalkan!')">
-                                                        <?= csrfField() ?>
-                                                        <input type="hidden" name="id" value="<?= $b['id'] ?>">
-                                                        <button type="submit" class="ps-action-btn ps-action-delete" title="Hapus Buku">
+                                                    <?php $isDipinjam = !empty($b['total_dipinjam']) && (int)$b['total_dipinjam'] > 0; ?>
+                                                    <?php if ($isDipinjam): ?>
+                                                        <button type="button" class="ps-action-btn ps-action-delete"
+                                                                title="Buku sedang dipinjam (<?= (int)$b['total_dipinjam'] ?> peminjaman aktif)"
+                                                                onclick="alert('Buku &quot;<?= e(addslashes($b['judul'])) ?>&quot; tidak dapat dihapus karena sedang dipinjam oleh user (<?= (int)$b['total_dipinjam'] ?> transaksi aktif).')"
+                                                                style="opacity: 0.45; cursor: not-allowed;">
                                                             <i data-lucide="trash-2"></i>
                                                         </button>
-                                                    </form>
+                                                    <?php else: ?>
+                                                        <form method="POST"
+                                                              action="<?= BASE_URL ?>/index.php?page=admin/buku/delete"
+                                                              class="d-inline"
+                                                              onsubmit="return confirm('Hapus buku &quot;<?= e(addslashes($b['judul'])) ?>&quot;?\nAksi ini tidak dapat dibatalkan!')">
+                                                            <?= csrfField() ?>
+                                                            <input type="hidden" name="id" value="<?= $b['id'] ?>">
+                                                            <button type="submit" class="ps-action-btn ps-action-delete" title="Hapus Buku">
+                                                                <i data-lucide="trash-2"></i>
+                                                            </button>
+                                                        </form>
+                                                    <?php endif; ?>
                                                 </div>
                                             </td>
                                         </tr>

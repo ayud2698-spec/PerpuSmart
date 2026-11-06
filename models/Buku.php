@@ -6,9 +6,12 @@ class Buku {
         $this->db = Database::getInstance();
     }
 
-    /** Ambil semua buku (dengan opsional limit/offset) */
+    /** Ambil semua buku (dengan opsional limit/offset) serta status peminjaman aktif */
     public function getAll(int $limit = 0, int $offset = 0): array {
-        $sql = 'SELECT * FROM buku ORDER BY created_at DESC';
+        $sql = "SELECT b.*, 
+                       (SELECT COUNT(*) FROM peminjaman p WHERE p.buku_id = b.id AND p.status IN ('dipinjam', 'terlambat')) AS total_dipinjam
+                FROM buku b 
+                ORDER BY b.created_at DESC";
         if ($limit > 0) {
             $sql .= ' LIMIT ' . (int)$limit . ' OFFSET ' . (int)$offset;
         }
@@ -41,9 +44,11 @@ class Buku {
     public function search(string $keyword): array {
         $kw = '%' . $keyword . '%';
         $stmt = $this->db->prepare(
-            'SELECT * FROM buku 
-             WHERE judul LIKE :k1 OR penulis LIKE :k2 OR kategori LIKE :k3 OR kode_buku LIKE :k4
-             ORDER BY judul ASC'
+            "SELECT b.*,
+                    (SELECT COUNT(*) FROM peminjaman p WHERE p.buku_id = b.id AND p.status IN ('dipinjam', 'terlambat')) AS total_dipinjam
+             FROM buku b 
+             WHERE b.judul LIKE :k1 OR b.penulis LIKE :k2 OR b.kategori LIKE :k3 OR b.kode_buku LIKE :k4
+             ORDER BY b.judul ASC"
         );
         $stmt->execute([':k1' => $kw, ':k2' => $kw, ':k3' => $kw, ':k4' => $kw]);
         return $stmt->fetchAll();
@@ -107,5 +112,19 @@ class Buku {
     public function delete(int $id): bool {
         $stmt = $this->db->prepare('DELETE FROM buku WHERE id = :id');
         return $stmt->execute([':id' => $id]);
+    }
+
+    /** Cek apakah buku sedang aktif dipinjam oleh user */
+    public function isDipinjam(int $id): bool {
+        $stmt = $this->db->prepare("SELECT COUNT(*) FROM peminjaman WHERE buku_id = :id AND status IN ('dipinjam', 'terlambat')");
+        $stmt->execute([':id' => $id]);
+        return (int) $stmt->fetchColumn() > 0;
+    }
+
+    /** Cek total peminjaman aktif untuk buku */
+    public function countActiveLoans(int $id): int {
+        $stmt = $this->db->prepare("SELECT COUNT(*) FROM peminjaman WHERE buku_id = :id AND status IN ('dipinjam', 'terlambat')");
+        $stmt->execute([':id' => $id]);
+        return (int) $stmt->fetchColumn();
     }
 }
